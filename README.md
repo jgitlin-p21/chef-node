@@ -19,7 +19,7 @@ Add role `bar` to node `foo`'s run list.
 var fs = require('fs'),
     chef = require('chef'),
     key = fs.readFileSync('/path/to/key.file.pem'),
-    client = chef.createClient('username', key, 'http://chef.server.com:4000');
+    client = chef.createClient('username', key, 'http://chef.server.com:4000', '12.8.0');
 
 client.get('/nodes/foo', function(err, res, body) {
     if (err) { return console.log(err); }

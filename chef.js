@@ -2,11 +2,14 @@ var authenticate = require('./chef/authenticate'),
     request = require('request'),
     methods = ['delete', 'get', 'post', 'put'];
 
-function Chef(user, key, base, version) {
+function Chef(user, key, options) {
     this.user = user;
     this.key = key;
-    this.base = base ? base : '';
-    this.version = version || '11.6.0';
+
+    options = options || {};
+    options.version = options.version || '12.8.0';
+    options.timeout = options.timeout || 30000;
+    this.options = options;
 }
 
 function req(method, uri, body, opts, callback) {
@@ -14,7 +17,7 @@ function req(method, uri, body, opts, callback) {
 
     // Add the base property of the client if the request does not specify the
     // full URL.
-    if (uri.indexOf(this.base) !== 0) { uri = this.base + uri; }
+    if (uri.indexOf(this.options.base) !== 0) { uri = this.options.base + uri; }
 
     // Use the third parameter as the callback if a body was not given (like for
     // a GET request.)
@@ -27,7 +30,8 @@ function req(method, uri, body, opts, callback) {
         headers: authenticate(this, { body: body, method: method, uri: uri }),
         json: true,
         method: method,
-        uri: uri
+        uri: uri,
+        timeout: this.options.timeout
     }), callback);
 }
 
@@ -37,6 +41,6 @@ methods.forEach(function (method) {
     };
 });
 
-exports.createClient = function (user, key, server, version) {
-    return new Chef(user, key, server, version);
+exports.createClient = function (user, key, options) {
+    return new Chef(user, key, options);
 };

@@ -18,6 +18,7 @@ function req(method, uri, body, opts, callback) {
     // Use the third parameter as the callback if a body was not given (like for
     // a GET request.)
     if (typeof body === 'function') { callback = body; body = undefined; }
+    if (body === null) { body = undefined; } // null is handled differently to undefined.
     if (typeof opts === 'function') { callback = opts; opts = undefined; }
 
     return request(Object.assign(Object.create(null), opts, {

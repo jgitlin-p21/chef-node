@@ -8,7 +8,7 @@ function Chef(user, key, base) {
     this.base = base ? base : '';
 }
 
-function req(method, uri, body, callback) {
+function req(method, uri, body, opts, callback) {
     method = method.toUpperCase();
 
     // Add the base property of the client if the request does not specify the
@@ -18,19 +18,20 @@ function req(method, uri, body, callback) {
     // Use the third parameter as the callback if a body was not given (like for
     // a GET request.)
     if (typeof body === 'function') { callback = body; body = undefined; }
+    if (typeof opts === 'function') { callback = opts; opts = undefined; }
 
-    return request({
+    return request(Object.assign(Object.create(null), opts, {
         body: body,
         headers: authenticate(this, { body: body, method: method, uri: uri }),
         json: true,
         method: method,
         uri: uri
-    }, callback);
+    }), callback);
 }
 
 methods.forEach(function (method) {
-    Chef.prototype[method] = function (uri, body, callback) {
-        return req.call(this, method, uri, body, callback);
+    Chef.prototype[method] = function (uri, body, opts, callback) {
+        return req.call(this, method, uri, body, opts, callback);
     };
 });
 

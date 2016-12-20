@@ -4,8 +4,7 @@
   "description": "Access the Opscode Chef Server API from Node",
   "main": "chef.js",
   "dependencies": {
-    "request": "~2",
-    "forsake": "~0.1"
+    "request": "~2"
   },
   "devDependencies": {
     "chai": "~1.7.2",

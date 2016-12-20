@@ -1,6 +1,7 @@
-var hash = require('crypto').createHash,
-    url = require('url'),
-    sign = require('forsake').sign;
+var crypto = require('crypto'),
+    hash = crypto.createHash,
+    privateEncrypt = crypto.privateEncrypt,
+    url = require('url');
 
 // Create a base64 encoded SHA1 hash from a string
 function sha1(str) {
@@ -51,7 +52,7 @@ module.exports = function authenticate(client, options) {
         'X-Ops-UserId': user
     };
 
-    sign(canonicalReq, client.key)
+    privateEncrypt(client.key, Buffer.from(canonicalReq))
         .toString('base64')
         .match(/.{1,60}/g)
         .forEach(function (hash, line) {

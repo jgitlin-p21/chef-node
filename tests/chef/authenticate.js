@@ -7,7 +7,11 @@ describe('authenticate', function () {
     beforeEach(function () {
         this.clock = sinon.useFakeTimers(0);
         this.client = { user: 'test', key: key };
-        this.options = { body: '', uri: 'https://example.com/test?query=string' };
+        this.options = {
+            body: '',
+            uri: 'https://example.com/test?query=string',
+            method: 'GET'
+        };
         this.headers = authenticate(this.client, this.options);
     });
 
@@ -43,16 +47,16 @@ describe('authenticate', function () {
 
     it('should have X-Ops-Authorization-N properites', function () {
         expect(this.headers).to.have.property('X-Ops-Authorization-1',
-            'KhaZ1XVgxQLGSNtFTlJqTbQzTbwwzB5i3FqgdoldtCbWoJJAAV8LZQBE6At3');
+            'iew4uHprBFtiCwPLMje8Szfkd6FSDZVJJ5P8SuKJpmMKEDwyD/P8/JtMaokw');
         expect(this.headers).to.have.property('X-Ops-Authorization-2',
-            'WcXbvwjaIJLokAybOkdWLW5J17GFlA/3y0Mlb7bo1v3l+aFpVn2sWNzKG8MN');
+            'eBeCgRp7VYnkjq+djg1YlXX5rBJoH0FawjIa6dI98LeFyNZ7+WJDHZDi4EcW');
         expect(this.headers).to.have.property('X-Ops-Authorization-3',
-            'DKnzw6hHOgnkUK7byLi0qfEd9J0d5Vh9t4cFemFfrKwp7r+yn+yp6QxahVZK');
+            'k9wKXFRiHtoMnabviq5u94yHyuf/bFvOWI7GLh0E7nwJiMdqNWVFSruD6T55');
         expect(this.headers).to.have.property('X-Ops-Authorization-4',
-            'GfwFUGH/TTE7EG8Zxiv620SvV00YozPswCcXAWgbfVOnHDfSpdzodg9q382P');
+            '+jHu8p6hEO6Vh7PUQKkupLvVM1AGZS10ycecPuPgqENagn2Ble17med74fRC');
         expect(this.headers).to.have.property('X-Ops-Authorization-5',
-            'SuiIOKavRlSQVGr1q7j0y7UiMrQaL9knE4A2u7ZI+FzNuddFFv9ha2k0H35c');
+            '7wOpHWuaUsWXFyn8/K1Qqi9O8yG0NJE05p9F91lgBKmip0ei08b7H6f1DeiA');
         expect(this.headers).to.have.property('X-Ops-Authorization-6',
-            'Zcmi9CoDumYXKcei2ANcGosTktauvG+cRAA/ub7kyQ==');
+            'iVZWvWTqwU3q6d+bSN20S6OaIT6zdlgjj9WfDnlaEw==');
     });
 });

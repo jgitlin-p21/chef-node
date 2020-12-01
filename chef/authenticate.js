@@ -35,17 +35,18 @@ module.exports = function authenticate(client, options) {
     var bh = bodyHash(options.body),
         ph = pathHash(options.uri),
         ts = timestamp(),
+        method = options.method || 'GET',
         user = client.user,
         canonicalReq, headers;
 
-    canonicalReq = 'Method:' + options.method + '\n' +
+    canonicalReq = 'Method:' + method + '\n' +
         'Hashed Path:' + ph + '\n' +
         'X-Ops-Content-Hash:' + bh + '\n' +
         'X-Ops-Timestamp:' + ts + '\n' +
         'X-Ops-UserId:' + user;
 
     headers = {
-        'X-Chef-Version': client.options.version,
+        'X-Chef-Version': options.version || '12.8.0',
         'X-Ops-Content-Hash': bh,
         'X-Ops-Sign': 'version=1.0',
         'X-Ops-Timestamp': ts,

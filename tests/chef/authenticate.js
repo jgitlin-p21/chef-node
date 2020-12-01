@@ -10,7 +10,8 @@ describe('authenticate', function () {
         this.options = {
             body: '',
             uri: 'https://example.com/test?query=string',
-            method: 'GET'
+            method: 'GET',
+            version: '11.6.0'
         };
         this.headers = authenticate(this.client, this.options);
     });
@@ -24,7 +25,7 @@ describe('authenticate', function () {
     });
 
     it('should have an X-Chef-Version property', function () {
-        expect(this.headers).to.have.property('X-Chef-Version', '11.6.0');
+        expect(this.headers).to.have.property('X-Chef-Version', this.options.version);
     });
 
     it('should have an X-Ops-Content-Hash property', function () {

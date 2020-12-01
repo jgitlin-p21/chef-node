@@ -17,7 +17,9 @@ function req(method, uri, body, opts, callback) {
 
     // Add the base property of the client if the request does not specify the
     // full URL.
-    if (uri.indexOf(this.options.base) !== 0) { uri = this.options.base + uri; }
+    if (this.options.base && this.options.base.length && uri.substr(0, this.options.base.length) != this.options.base) {
+        uri = this.options.base + uri;
+    }
 
     // Use the third parameter as the callback if a body was not given (like for
     // a GET request.)

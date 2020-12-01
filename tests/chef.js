@@ -13,7 +13,7 @@ describe('chef', function () {
     describe('Client', function () {
         describe('Base URI', function () {
             beforeEach(function () {
-                this.client = chef.createClient('test', key, 'https://example.com');
+                this.client = chef.createClient('test', key, {base: 'https://example.com'});
                 nock('https://example.com').get('/nodes').reply(200);
             });
 

@@ -18,10 +18,6 @@ function Chef(user, key, options) {
 }
 
 function req(method, uri, body, opts) {
-    method = method.toUpperCase();
-
-    opts = opts || {};
-
     // Add the base property of the client if the request does not specify the
     // full URL.
     if (this.options.base && this.options.base.length && uri.substr(0, this.options.base.length) != this.options.base) {
@@ -30,50 +26,74 @@ function req(method, uri, body, opts) {
 
     let my_url = url.parse(uri);
 
-    let headers = Object.assign(opts.headers ? opts.headers : {}, authenticate(this, method, uri, body));
+    opts = Object.assign(opts || {}, {
+        headers: {},
+        method: method.toUpperCase(),
+        path: my_url.pathname,
+        host: my_url.hostname,
+        port: my_url.port
+    });
 
     if (body) {
-        headers['Content-Length'] = Buffer.byteLength(body);
+        body = JSON.stringify(body) + "\r\n";
+        opts.headers["Content-Type"] = "application/json";
+        opts.headers["Content-Length"] = Buffer.byteLength(body);
+    } else {
+        body = "";
     }
-    
+
+    opts.headers = Object.assign(opts.headers, authenticate(this, opts.method, uri, body));
+
+    //console.log('REQUEST Headers:');
+    //console.dir(opts.headers);
+
     return new Promise((resolve, reject) => {
-        let body = "";
-        let client = https.request(my_url, (res) => {
+        let response_body = "";
+        let client = https.request(opts, (res) => {
             try {
-                console.log('statusCode:', res.statusCode);
-                console.log('headers:', res.headers);
+                //console.log(`DEBUG ${my_url.href} statusCode: ${res.statusCode}`);
+                //console.log(`DEBUG ${my_url.href} headers: `);
+                //console.dir(res.headers);
               
                 res.on('data', (d) => {
-                    body += d;
+                    response_body += d;
                 });
                 
                 ///////////
                 res.on('end', () => {
+                    //console.log(`DEBUG ${my_url.href} complete. Body: ${response_body}`);
                     try {
+                        let result = response_body;
                         if (res.statusCode >= 200 && res.statusCode <= 299) {
-                            console.log(`PASS: ${my_url.href}`);
-                            result = {};
-                            resolve(result, data, res);
+                            //console.log(`PASS: ${my_url.href}`);
+                            //console.log(`DEBUG: body: ${body}`);
+                            if (res.headers["content-type"] === 'application/json') {
+                                result = JSON.parse(response_body);
+                            }
+                            resolve(result, response_body, res);
                         }
                         else {
                             console.warn(`FAIL: ${my_url.href} HTTP ${res.statusCode}`);
-                            reject(new Error("HTTP Result Code not OK"), data, res);
+                            reject(new Error("HTTP Result Code not OK"), response_body, res);
                         }
                     } catch (err) {
                         console.error(`Error caught inside response end closure: ${err}`);
-                        reject(err, body, res);
+                        reject(err, response_body, res);
                     }
                 });
                 ///////////
             }
             catch (ex) {
+                console.error("ERROR in https request", ex);
                 reject(ex);
             }
-        }).on('error', (e) => {
+        });
+        client.on('error', (e) => {
             console.error(`Failed to make request to ${my_url.href} -- ${e}`);
             reject(e);
         });
-        if (body) {
+        if (body && body.length) {
+            //console.log(`DEBUG: SEND: ${body}`);
             client.write(body);
         }
         client.end();

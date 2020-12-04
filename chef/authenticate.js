@@ -10,7 +10,7 @@ function sha1(str) {
 
 // Hash the stringified body
 function bodyHash(body) {
-    return sha1(body ? JSON.stringify(body) : '');
+    return sha1(body ? body : '');
 }
 
 // Hash the path of the uri
@@ -31,10 +31,6 @@ function timestamp() {
 // Returns an object that includes the required headers for
 // authenticating with Chef.
 module.exports = function authenticate(client, method, uri, body) {
-    if (body) {
-        console.log(`DEBUG body: ${body}`)
-    }
-    body = "";
     var bh = bodyHash(body),
         ph = pathHash(uri),
         ts = timestamp(),

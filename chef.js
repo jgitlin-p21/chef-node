@@ -1,6 +1,10 @@
-var authenticate = require('./chef/authenticate'),
+const authenticate = require('./chef/authenticate'),
     request = require('request'),
     methods = ['delete', 'get', 'post', 'put'];
+
+const os = require('os');
+const url = require('url');
+const https = require('https');
 
 function Chef(user, key, options) {
     this.user = user;
@@ -10,10 +14,13 @@ function Chef(user, key, options) {
     options.version = options.version || '12.8.0';
     options.timeout = options.timeout || 30000;
     this.options = options;
+    this.version = options.version;
 }
 
-function req(method, uri, body, opts, callback) {
+function req(method, uri, body, opts) {
     method = method.toUpperCase();
+
+    opts = opts || {};
 
     // Add the base property of the client if the request does not specify the
     // full URL.
@@ -21,11 +28,56 @@ function req(method, uri, body, opts, callback) {
         uri = this.options.base + uri;
     }
 
-    // Use the third parameter as the callback if a body was not given (like for
-    // a GET request.)
-    if (typeof body === 'function') { callback = body; body = undefined; }
-    if (body === null) { body = undefined; } // null is handled differently to undefined.
-    if (typeof opts === 'function') { callback = opts; opts = undefined; }
+    let my_url = url.parse(uri);
+
+    let headers = Object.assign(opts.headers ? opts.headers : {}, authenticate(this, method, uri, body));
+
+    if (body) {
+        headers['Content-Length'] = Buffer.byteLength(body);
+    }
+    
+    return new Promise((resolve, reject) => {
+        let body = "";
+        let client = https.request(my_url, (res) => {
+            try {
+                console.log('statusCode:', res.statusCode);
+                console.log('headers:', res.headers);
+              
+                res.on('data', (d) => {
+                    body += d;
+                });
+                
+                ///////////
+                res.on('end', () => {
+                    try {
+                        if (res.statusCode >= 200 && res.statusCode <= 299) {
+                            console.log(`PASS: ${my_url.href}`);
+                            result = {};
+                            resolve(result, data, res);
+                        }
+                        else {
+                            console.warn(`FAIL: ${my_url.href} HTTP ${res.statusCode}`);
+                            reject(new Error("HTTP Result Code not OK"), data, res);
+                        }
+                    } catch (err) {
+                        console.error(`Error caught inside response end closure: ${err}`);
+                        reject(err, body, res);
+                    }
+                });
+                ///////////
+            }
+            catch (ex) {
+                reject(ex);
+            }
+        }).on('error', (e) => {
+            console.error(`Failed to make request to ${my_url.href} -- ${e}`);
+            reject(e);
+        });
+        if (body) {
+            client.write(body);
+        }
+        client.end();
+    });
 
     return request(Object.assign(Object.create(null), opts, {
         body: body,

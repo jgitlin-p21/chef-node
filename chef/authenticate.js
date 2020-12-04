@@ -26,16 +26,19 @@ function timestamp() {
 // Function used internally to build Chef authentication headers.
 //
 // Takes a client object and an options object. The client object must
-// contain a user and key; the options object must include uri, method,
-// and body.
+// contain a user and key; it may also contain an API version string
 //
 // Returns an object that includes the required headers for
 // authenticating with Chef.
-module.exports = function authenticate(client, options) {
-    var bh = bodyHash(options.body),
-        ph = pathHash(options.uri),
+module.exports = function authenticate(client, method, uri, body) {
+    if (body) {
+        console.log(`DEBUG body: ${body}`)
+    }
+    body = "";
+    var bh = bodyHash(body),
+        ph = pathHash(uri),
         ts = timestamp(),
-        method = options.method || 'GET',
+        method = method,
         user = client.user,
         canonicalReq, headers;
 
@@ -46,7 +49,7 @@ module.exports = function authenticate(client, options) {
         'X-Ops-UserId:' + user;
 
     headers = {
-        'X-Chef-Version': options.version || '12.8.0',
+        'X-Chef-Version': client.version || '12.8.0',
         'X-Ops-Content-Hash': bh,
         'X-Ops-Sign': 'version=1.0',
         'X-Ops-Timestamp': ts,

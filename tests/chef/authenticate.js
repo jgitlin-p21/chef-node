@@ -6,14 +6,18 @@ var authenticate = require('../../chef/authenticate'),
 describe('authenticate', function () {
     beforeEach(function () {
         this.clock = sinon.useFakeTimers(0);
-        this.client = { user: 'test', key: key };
+        this.api_version = '11.6.0'
+        this.client = {
+            user: 'test',
+            key: key,
+            version: this.api_version
+        };
         this.options = {
             body: '',
             uri: 'https://example.com/test?query=string',
-            method: 'GET',
-            version: '11.6.0'
+            method: 'GET'
         };
-        this.headers = authenticate(this.client, this.options);
+        this.headers = authenticate(this.client, this.options.method, this.options.uri, this.options.body)
     });
 
     afterEach(function () {
@@ -25,7 +29,7 @@ describe('authenticate', function () {
     });
 
     it('should have an X-Chef-Version property', function () {
-        expect(this.headers).to.have.property('X-Chef-Version', this.options.version);
+        expect(this.headers).to.have.property('X-Chef-Version', this.api_version);
     });
 
     it('should have an X-Ops-Content-Hash property', function () {

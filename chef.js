@@ -29,7 +29,7 @@ function req(method, uri, body, opts) {
     opts = Object.assign(opts || {}, {
         headers: {},
         method: method.toUpperCase(),
-        path: my_url.pathname,
+        path: my_url.path,
         host: my_url.hostname,
         port: my_url.port
     });
